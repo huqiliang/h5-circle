@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+    <head>
+        <title>Test for H5Draw</title>
+        <style>
+			img,div{ padding:0; margin:0;}
+			#lock{position:relative;}
+            #cvs{ position:absolute;top:0px;left:0px; width:403px; height:403px;}
+        </style>
+            <script src="zepto.min.js"></script>
+        <script src="H5Draw.js"></script>
+        <script>
+		$(function(){
+			var angle = [10,12,14,16,18,20,22,24,26,28];
+			var alpha = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1];
+			var h5dctx = H5D.D2('cvs');
+			var locked=true;
+			var ajaxgo=false;
+			h5dctx .drawCircle(249,249,168).stroke(
+				{    color:"#ff4d4d",
+					lineWidth:36
+				});
+			
+			function draw_circle(){
+				$.ajax({
+					   url:'http://192.168.0.106:81/weixinBinding.htm',
+					   type: 'POST',
+					   success: function(data){
+						  if(true){
+								ajaxgo=true;
+						  }
+							
+					  }
+				 }); 
+				$("#lockimg").attr("src","lockRedOn.png");
+				 set=setInterval(function(){
+						for(var i = 0;i < 10;i++){
+							if(angle[i]>368){
+                               $("#lockimg").attr("src","lockGreenOn.png")
+							   clearInterval(set);
+							   locked=false;
+							   break;
+                            }
+							var x = 164*Math.cos((angle[i])*Math.PI/180)+249;
+							var y = 164*Math.sin((angle[i])*Math.PI/180)+249;
+							h5dctx.drawCircle(x,y,22).fill(
+							{    color:"rgba(0,189,155,1)",
+								shadow:{
+								//blur:2,color:"#ddd"
+							}});
+							angle[i]+=5;
+                    }
+                    },33); 
+
+			}
+			if(locked==true){   //普通锁住状态时候
+			  $("#lock").bind("touchstart",draw_circle).bind("touchend",function(){
+				  	if(ajaxgo==true){
+						 $("#lockimg").attr("src","lockGreen.png");
+						 setTimeout(function(){
+							  $("#lockimg").attr("src","lockRed.png");
+							}
+						 ,10000);
+						 ajaxgo=false;
+					}else{
+						 $("#lockimg").attr("src","lockRed.png")
+					}
+					h5dctx.clear();
+					angle = [10,12,14,16,18,20,22,24,26,28];
+					 clearInterval(set)
+				})
+			}
+			else{            //普通已开锁状态
+				$("#lockimg").attr("src","lockGreen.png")
+			}
+		})        
+        </script>
+    </head>
+
+    <body>
+    	<div id="lock">
+            <img src="lockRed.png" width="403" height="403" id="lockimg">
+            <canvas id="cvs" width="500" height="500"></canvas>
+        </div>
+    </body>
+
+</html>
